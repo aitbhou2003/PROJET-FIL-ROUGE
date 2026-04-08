@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
+// use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,5 +28,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function ventes()
+    {
+        return $this->hasMany(Vente::class);
+    }
+
+    public function movementStocks()
+    {
+        return $this->hasMany(MovementStock::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role->role === 'admin';
+    }
+
+    public function isEmploye()
+    {
+        return $this->role->role === 'employe';
     }
 }

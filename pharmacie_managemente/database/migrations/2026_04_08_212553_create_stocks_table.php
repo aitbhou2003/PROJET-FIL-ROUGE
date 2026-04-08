@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('stocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('medicament_id')->constrained('medicaments');
-            $table->string('numero_lot');
+            $table->string('numero_lot')->unique();
             $table->integer('quantite')->default(0);
             $table->integer('seuil_minimum')->default(10);
             $table->decimal('prix_achat', 10, 2);

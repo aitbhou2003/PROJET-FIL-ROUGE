@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             'lastname' => 'Pharmacien',
             'email' => 'admin@pharmacie.com',
             'password' => bcrypt('password'),
-            'role_id' => 1, // admin (créé par RoleSeeder)
+            'role_id' => 1, 
             'telephone' => '0612345678',
             'is_actif' => true,
         ]);
@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
             'lastname' => 'Employe',
             'email' => 'employe@pharmacie.com',
             'password' => bcrypt('password'),
-            'role_id' => 2, // employe
+            'role_id' => 2, 
             'telephone' => '0698765432',
             'is_actif' => true,
         ]);

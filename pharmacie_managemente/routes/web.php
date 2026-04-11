@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\MedicamentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,7 +16,7 @@ Route::get('/login', [LoginController::class, 'index'])
 
 // login store
 Route::post('/login', [LoginController::class, 'store'])
-    ->name('login');
+    ->name('login.store');
 
 
 
@@ -40,4 +41,7 @@ Route::middleware(['role:admin'])->group(function () {
 
     Route::post('/register', [RegisterController::class, 'store'])
         ->name('register.store');
+
+    // medicaenmnts
+    Route::resource('medicaments', MedicamentController::class);
 });

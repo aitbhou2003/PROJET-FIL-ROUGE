@@ -23,7 +23,7 @@ class CheckRole
         if ($user->role->role !== $role) {
             abort(403, "acces intedrdit , vous n'avez pas la permissions nexessaires");
         }
-
+        
         return $next($request);
     }
 }

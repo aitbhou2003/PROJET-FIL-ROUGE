@@ -28,7 +28,7 @@ class StoreRegisterRequest extends FormRequest
             'lastname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users', 'email'],
             'password' => ['required', 'string', 'confirmed', 'min:6'],
-            'role_id' => ['required', 'exists:roles', 'id'],
+            'role_id' => ['required', 'exists:roles,id'],
             'is_actif' => ['boolean'],
 
         ];

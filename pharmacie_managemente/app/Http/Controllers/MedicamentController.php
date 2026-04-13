@@ -14,11 +14,23 @@ class MedicamentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        //  $search = $request->search ;
+        // \dd($search);
+
 
         $medicaments = Medicament::with('categorie', 'stocks');
+        if ($request->filled('search')) {
+            $medicaments->where('nom', 'like', '%' . $request->search . '%')
+                ->orWhere('code_barre', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('categorie')) {
+            $medicaments->where('categorie_id', $request->categorie);
+        }
+
         $medicaments = $medicaments->latest()->paginate(10);
         $categories = Categorie::all();
         return view('medicaments.index', compact('medicaments', 'categories'));
@@ -40,6 +52,7 @@ class MedicamentController extends Controller
     public function store(StoreMedicamentRequest $request)
     {
         //
+
         $validated = $request->validated();
 
 
@@ -79,24 +92,44 @@ class MedicamentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Medicament $medicament)
     {
         //
+        $categories = Categorie::all();
+        return view('medicaments.edit', compact('medicament', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Medicament $medicament)
     {
         //
+        $validated = $request->validate([
+            'categorie_id' => ['required', 'exists:categories,id'],
+            'nom' => ['required', 'string', 'max:255'],
+            'code_barre' => ['required', 'string', 'unique:medicaments'],
+            'description' => ['nullable', 'string'],
+            'fabricant' => ['required', 'string'],
+            'forme_dosage' => ['required', 'string'],
+            'ordonnance_requise' => 'boolean',
+        ]);
+
+        $medicament->update($validated);
+
+        return redirect()->route('medicaments.index')
+            ->with('success', 'Médicament est modifiee');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Medicament $medicament)
+
     {
         //
+        $medicament->update(['is_actif' => false]);
+        return redirect()->route('medicaments.index')
+            ->with('success', 'Médicament désactivé.');
     }
 }

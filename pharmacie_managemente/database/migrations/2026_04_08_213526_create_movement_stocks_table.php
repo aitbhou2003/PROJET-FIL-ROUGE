@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('movement_stocks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('stock_id')->constrained('stocks');
+            $table->foreignId('stock_id')->constrained('stocks')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users');
             $table->enum('type', ['entree', 'sortie', 'ajustement', 'suppression']);
             $table->integer('quantite');

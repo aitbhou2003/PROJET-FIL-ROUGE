@@ -7,7 +7,7 @@ use App\Models\Categorie;
 use App\Models\Medicament;
 use App\Models\Stock;
 use Illuminate\Http\Request;
-use SebastianBergmann\CodeCoverage\Test\TestSize\Medium;
+// use SebastianBergmann\CodeCoverage\Test\TestSize\Medium;
 
 class MedicamentController extends Controller
 {

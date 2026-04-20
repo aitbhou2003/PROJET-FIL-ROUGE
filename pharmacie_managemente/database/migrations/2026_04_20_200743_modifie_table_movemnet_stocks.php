@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('stock_ventes', function (Blueprint $table) {
+        Schema::table('movement_stocks', function (Blueprint $table) {
             //
-            $table->foreignId('medicament_id')->constrained('medicaments')->cascadeOnDelete();
-            $table->boolean('etre_remise')->default(false);
+            $table->dropColumn('type');
+            $table->enum('type', ['entree', 'sortie', 'ajustement', 'suppression', 'annulation']);
+            $table->foreignId('vente_id')->nullable()->constrained('ventes');
         });
     }
 
@@ -23,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('stock_ventes', function (Blueprint $table) {
+        Schema::table('movement_stocks', function (Blueprint $table) {
             //
         });
     }

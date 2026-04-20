@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\MedicamentController;
+use App\Http\Controllers\StockController;
+use App\Http\Controllers\VenteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -44,4 +46,18 @@ Route::middleware(['role:admin'])->group(function () {
 
     // medicaenmnts
     Route::resource('medicaments', MedicamentController::class);
+    // stock
+    Route::post('/stocks', [StockController::class, 'store'])->name('stocks.store');
+    Route::post('/stocks/{stock}/update', [StockController::class, 'update'])->name('stocks.update');
+});
+
+
+Route::middleware(['auth'])->group(function () {
+    // vente 
+    Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
+    Route::get('/ventes/nouvelle', [VenteController::class, 'create'])->name('ventes.create');
+    Route::post('/ventes', [VenteController::class, 'store'])->name('ventes.store');
+    Route::get('/ventes/{vente}', [VenteController::class, 'show'])->name('ventes.show');
+    // stock
+    Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
 });

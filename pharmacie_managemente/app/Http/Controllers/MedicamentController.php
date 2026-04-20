@@ -54,6 +54,10 @@ class MedicamentController extends Controller
         //
 
         $validated = $request->validated();
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('medicaments', 'public');
+        }
 
 
         $medicament = Medicament::create([
@@ -63,6 +67,7 @@ class MedicamentController extends Controller
             'description' => $validated['description'],
             'fabricant' => $validated['fabricant'],
             'forme_dosage' => $validated['forme_dosage'],
+            'image' => $imagePath ?? null,
             'ordonnance_requise' => $request->boolean('ordonnance_requise'),
         ]);
 
@@ -84,11 +89,21 @@ class MedicamentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Medicament $medicament)
     {
         //
+        $medicament->load(['stocks' => function ($q) {
+            $q->where('is_actif', \true)
+                ->orderBy('date_expiration', 'asc');
+        }, 'stocks', 'categorie']);
+        // \dd($medicament->categorie->nom);
+        foreach ($medicament->stocks as $stocks) {
+            echo '<pre>';
+            var_dump($stocks);
+            echo '</pre>';
+        }
     }
-
+ 
     /**
      * Show the form for editing the specified resource.
      */
@@ -128,7 +143,8 @@ class MedicamentController extends Controller
 
     {
         //
-        $medicament->update(['is_actif' => false]);
+        // \dd($medicament);
+        $medicament->delete();
         return redirect()->route('medicaments.index')
             ->with('success', 'Médicament désactivé.');
     }

@@ -14,7 +14,7 @@ class StockController extends Controller
     public function index()
     {
         //
-        $srocks = Stock::with('medicament')
+        $stocks = Stock::with('medicament')
             ->where('is_actif', true)
             ->orderBy('date_expiration')
             ->paginate('15');

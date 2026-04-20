@@ -31,6 +31,7 @@ class StoreMedicamentRequest extends FormRequest
             'fabricant' => ['required', 'string'],
             'forme_dosage' => ['required', 'string'],
             'ordonnance_requise' => 'boolean',
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'numero_lot' => ['required', 'string'],
             'quantite' => ['required', 'integer', 'min:1'],
             'seuil_minimum' => ['required', 'integer', 'min:1'],

@@ -3,25 +3,28 @@
 @section('title', 'Dashboard Employé')
 
 @section('content')
-    <div class="px-4 sm:px-0 text-center">
-        <div class="bg-white shadow rounded-lg p-12">
-            <i class="fas fa-cash-register text-6xl text-green-500 mb-6"></i>
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Point de Vente</h2>
-            <p class="text-gray-500 mb-8">Cliquez ci-dessous pour démarrer une nouvelle vente</p>
-
-            <a href="#"
-                class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:text-xl">
-                <i class="fas fa-plus-circle mr-3"></i>Nouvelle Vente
+<div class="space-y-6">
+    <h1 class="text-3xl font-bold text-gray-900">Mon Espace</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Bouton vente principal -->
+        <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-lg shadow-lg p-8 text-white text-center">
+            <i class="fas fa-cash-register text-6xl mb-4 opacity-80"></i>
+            <h2 class="text-2xl font-bold mb-4">Point de Vente</h2>
+            <p class="mb-6 opacity-90">Cliquez ci-dessous pour démarrer une nouvelle vente</p>
+            <a href="{{ route('ventes.create') }}" class="inline-block bg-white text-green-600 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition">
+                <i class="fas fa-plus-circle mr-2"></i>Nouvelle Vente
             </a>
         </div>
 
-        <div class="mt-8 bg-white shadow rounded-lg overflow-hidden">
-            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Mes ventes aujourd'hui</h3>
-            </div>
-            <div class="p-4 text-gray-500">
-                Aucune vente enregistrée aujourd'hui
+        <!-- Mes stats -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-bold mb-4 text-gray-800">Mes ventes aujourd'hui</h2>
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-receipt text-4xl mb-2 opacity-30"></i>
+                <p>Aucune vente enregistrée aujourd'hui</p>
             </div>
         </div>
     </div>
+</div>
 @endsection

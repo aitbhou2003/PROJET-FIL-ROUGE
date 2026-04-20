@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('vente_id')->constrained('ventes')->onDelete('cascade');
             $table->foreignId('stock_id')->constrained('stocks');
             $table->integer('quantite');
-            $table->decimal('prix_unitaire', 10, 2); // snapshot du prix au moment de la vente
+            $table->decimal('prix_unitaire', 10, 2);
             $table->decimal('total', 10, 2);
             $table->timestamps();
         });

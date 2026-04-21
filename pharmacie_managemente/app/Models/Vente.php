@@ -10,10 +10,18 @@ class Vente extends Model
     protected $fillable = [
         'user_id',
         'nom_client',
-        'telephone_client',
         'mode_paiement',
-        'remise',
-        'total'
+        'remise_globale',
+        'total',
+        'remise_pourcentage',
+        'total_ht',
+        'total_ttc',
+        'statut',
+        'date_annulation',
+        'motif_annulation',
+        'date_annulation',
+        'ordonnance',
+
     ];
 
 
@@ -31,5 +39,28 @@ class Vente extends Model
     {
         $this->total = $this->stockVentes->sum('total') - $this->remise;
         return $this;
+    }
+
+
+    public function stocks()
+    {
+        return $this->belongsToMany(Stock::class, 'stock_ventes')
+            ->with('quantite', 'prix_unitaire', 'total', 'medicament_id', 'etre_remise')
+            ->withTimestamps();
+    }
+
+    public function mouvementStocks()
+    {
+        return $this->hasMany(MovementStock::class);
+    }
+
+    public function isAnulle(): bool
+    {
+        return $this->statue === 'anuulee';
+    }
+
+    public function isTerminee(): bool
+    {
+        return $this->statut === 'terminee';
     }
 }

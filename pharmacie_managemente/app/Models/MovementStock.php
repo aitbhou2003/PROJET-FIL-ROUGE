@@ -16,7 +16,8 @@ class MovementStock extends Model
         'quantite',
         'quantite_avant',
         'quantite_apres',
-        'motif'
+        'motif',
+        'vente_id'
     ];
 
     public function stock()
@@ -28,4 +29,11 @@ class MovementStock extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function vente()
+    {
+        return $this->belongsTo(Vente::class);
+    }
+    
+    
 }

@@ -8,6 +8,7 @@ use App\Models\Medicament;
 use App\Models\MovementStock;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 // use SebastianBergmann\CodeCoverage\Test\TestSize\Medium;
 
@@ -114,19 +115,21 @@ class MedicamentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Medicament $medicament)
+    public function edit(int  $id)
     {
         //
         $categories = Categorie::all();
+        $medicament = Medicament::find($id);
         return view('medicaments.edit', compact('medicament', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Medicament $medicament)
+    public function update(Request $request, int $id)
     {
         //
+        $medicament = Medicament::find($id);
         $validated = $request->validate([
             'categorie_id' => ['required', 'exists:categories,id'],
             'nom' => ['required', 'string', 'max:255'],
@@ -135,9 +138,25 @@ class MedicamentController extends Controller
             'fabricant' => ['required', 'string'],
             'forme_dosage' => ['required', 'string'],
             'ordonnance_requise' => 'boolean',
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
+        if ($request->hasFile('image')) {
+            if ($medicament->image && Storage::exists('public/' . $medicament->image)) {
+                Storage::delete('public/' . $medicament->image);
+            }
+            $validated['image'] = $request->file('image')->store('medicaments', 'public');
+        }
 
-        $medicament->update($validated);
+        $medicament->update([
+            'categorie_id' => $validated['categorie_id'],
+            'nom' => $validated['nom'],
+            'code_barre' => $validated['code_barre'],
+            'description' => $validated['description'] ?? null,
+            'fabricant' => $validated['fabricant'],
+            'forme_dosage' => $validated['forme_dosage'],
+            'ordonnance_requise' => $validated['ordonnance_requise'] ?? false,
+            'image' => $validated['image'] ?? $medicament->image,
+        ]);
 
         return redirect()->route('medicaments.index')
             ->with('success', 'Médicament est modifiee');

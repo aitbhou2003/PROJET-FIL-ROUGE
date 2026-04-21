@@ -165,13 +165,23 @@ class MedicamentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Medicament $medicament)
+    public function destroy(int $id)
 
     {
         //
-        // \dd($medicament);
+        $medicament = Medicament::find($id);
+        $stockCount = $medicament->stocks()->sum('quantite');
+        if ($stockCount > 0) {
+            return back()->with('error', 'Impossible de supprimer: stock existant');
+        }
+
+        if ($medicament->image && Storage::exists('public/' . $medicament->image)) {
+            Storage::delete('public/' . $medicament->image);
+        }
+
         $medicament->delete();
+
         return redirect()->route('medicaments.index')
-            ->with('success', 'Médicament désactivé.');
+            ->with('success', 'Médicament supprimé avec succès');
     }
 }

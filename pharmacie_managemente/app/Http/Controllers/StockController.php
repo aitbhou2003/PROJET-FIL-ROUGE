@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Medicament;
 use App\Models\MovementStock;
 use App\Models\Stock;
 use Illuminate\Http\Request;
@@ -25,7 +26,19 @@ class StockController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
+    public function create($id = null)
+    {
+        //
+        $medicaments = Medicament::all();
+        $medicament = Medicament::find($id);
+
+        return view('stocks.create', compact('medicaments', 'medicament'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
         //
         $validated = $request->validate([
@@ -38,7 +51,16 @@ class StockController extends Controller
             'date_expiration' => ['required', 'date', 'after:today'],
         ]);
 
-        $stock = Stock::create($validated + ['is_actif' => true]);
+        $stock = Stock::create([
+            'medicament_id'=>$validated['medicament_id'],
+            'numero_lot'=>$validated['numero_lot'],
+            'quantite'=>$validated['quantite'],
+            'seuil_minimum'=>$validated['seuil_minimum'],
+            'prix_achat'=>$validated['prix_achat'],
+            'prix_vente'=>$validated['prix_vente'],
+            'date_expiration'=>$validated['date_expiration'],
+            'is_actif'=>true
+        ]);
         MovementStock::create([
             'stock_id' => $stock->id,
             'user_id' => auth()->id(),
@@ -51,14 +73,6 @@ class StockController extends Controller
 
         return redirect()->back()
             ->with('success', 'Stock ajouté avec succès');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**

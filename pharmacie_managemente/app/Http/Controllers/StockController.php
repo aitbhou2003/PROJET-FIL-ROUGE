@@ -52,14 +52,14 @@ class StockController extends Controller
         ]);
 
         $stock = Stock::create([
-            'medicament_id'=>$validated['medicament_id'],
-            'numero_lot'=>$validated['numero_lot'],
-            'quantite'=>$validated['quantite'],
-            'seuil_minimum'=>$validated['seuil_minimum'],
-            'prix_achat'=>$validated['prix_achat'],
-            'prix_vente'=>$validated['prix_vente'],
-            'date_expiration'=>$validated['date_expiration'],
-            'is_actif'=>true
+            'medicament_id' => $validated['medicament_id'],
+            'numero_lot' => $validated['numero_lot'],
+            'quantite' => $validated['quantite'],
+            'seuil_minimum' => $validated['seuil_minimum'],
+            'prix_achat' => $validated['prix_achat'],
+            'prix_vente' => $validated['prix_vente'],
+            'date_expiration' => $validated['date_expiration'],
+            'is_actif' => true
         ]);
         MovementStock::create([
             'stock_id' => $stock->id,
@@ -81,6 +81,8 @@ class StockController extends Controller
     public function show(string $id)
     {
         //
+        $stock = Stock::with(['medicament', 'movementStocks.user'])->find($id);
+        return view('stocks.show', compact('stock'));
     }
 
     /**
@@ -89,6 +91,8 @@ class StockController extends Controller
     public function edit(string $id)
     {
         //
+        $stock = Stock::with('medicament')->findOrFail($id);
+        return view('stocks.edit', compact('stock'));
     }
 
     /**

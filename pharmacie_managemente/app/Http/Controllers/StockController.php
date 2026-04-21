@@ -98,14 +98,14 @@ class StockController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Stock $stock)
+    public function update(Request $request, int $id)
     {
         //
         $validated = $request->validate([
             'quantite_ajustee' => ['required', 'numeric', 'min:0'],
             'motif' => ['required', 'string'],
         ]);
-
+        $stock = Stock::find($id);
         $ancienne = $stock->quantite;
         $nouvelle =  $validated['quantite_ajustee'];
 

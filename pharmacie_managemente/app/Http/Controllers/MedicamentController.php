@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreMedicamentRequest;
 use App\Models\Categorie;
 use App\Models\Medicament;
+use App\Models\MovementStock;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 // use SebastianBergmann\CodeCoverage\Test\TestSize\Medium;
@@ -21,7 +22,9 @@ class MedicamentController extends Controller
         // \dd($search);
 
 
-        $medicaments = Medicament::with('categorie', 'stocks');
+        $medicaments = Medicament::with(['categorie', 'stocks' => function ($q) {
+            $q->where('is_actif', true);
+        }]);
         if ($request->filled('search')) {
             $medicaments->where('nom', 'like', '%' . $request->search . '%')
                 ->orWhere('code_barre', 'like', '%' . $request->search . '%');
@@ -70,8 +73,7 @@ class MedicamentController extends Controller
             'image' => $imagePath ?? null,
             'ordonnance_requise' => $request->boolean('ordonnance_requise'),
         ]);
-
-        Stock::create([
+        $stock=Stock::create([
             'medicament_id' => $medicament->id,
             'numero_lot' => $validated['numero_lot'],
             'quantite' => $validated['quantite'],
@@ -80,6 +82,16 @@ class MedicamentController extends Controller
             'prix_vente' => $validated['prix_vente'],
             'date_expiration' => $validated['date_expiration'],
             'is_actif' => true,
+        ]);
+
+        MovementStock::created([
+            'stock_id'=>$stock->id,
+            'user_id'=>auth()->id(),
+            'type'=>'entree',
+            'quantite'=>$validated['quantite'],
+            'quantite_avant'=>0,
+            'quantite_apres'=>$validated['quantite'],
+            'motif'=> 'Création médicament et stock initial',
         ]);
 
         return redirect()->route('medicaments.index')
@@ -103,7 +115,7 @@ class MedicamentController extends Controller
             echo '</pre>';
         }
     }
- 
+
     /**
      * Show the form for editing the specified resource.
      */

@@ -35,17 +35,12 @@ class Vente extends Model
         return $this->hasMany(StockVente::class);
     }
 
-    public function calculerTotal()
-    {
-        $this->total = $this->stockVentes->sum('total') - $this->remise;
-        return $this;
-    }
 
 
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'stock_ventes')
-            ->with('quantite', 'prix_unitaire', 'total', 'medicament_id', 'etre_remise')
+            ->withPivot('quantite', 'prix_unitaire', 'total', 'medicament_id', 'etre_remise')
             ->withTimestamps();
     }
 

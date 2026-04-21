@@ -132,8 +132,31 @@ class StockController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(int $id)
     {
         //
+        $stock = Stock::find($id);
+        $validated = request()->validate([
+            'motif' => ['required', 'string', 'min:5']
+        ]);
+
+        $quamtiteAvant = $stock->quantite;
+        $stock->update([
+            'quantite' => 0,
+            'is_actif' => false
+        ]);
+
+        MovementStock::create([
+            'stock_id' => $stock->id,
+            'user_id' => auth()->id(),
+            'type' => 'suppression',
+            'quantite' => 0,
+            'quantite_avant' => $quamtiteAvant,
+            'quantite_apres' => 0,
+            'motif' => $validated['motif'],
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'stock mis à zéro');
     }
 }

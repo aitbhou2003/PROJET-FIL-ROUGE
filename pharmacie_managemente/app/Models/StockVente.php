@@ -15,10 +15,11 @@ class StockVente extends Model
         'stock_id',
         'quantite',
         'prix_unitaire',
-        'total'
+        'total',
+        'etre_remise'
     ];
 
-   
+
     public function vente()
     {
         return $this->belongsTo(Vente::class);
@@ -29,5 +30,8 @@ class StockVente extends Model
         return $this->belongsTo(Stock::class);
     }
 
-    
+    public function medicament()
+    {
+        return $this->belongsTo(Medicament::class);
+    }
 }

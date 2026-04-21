@@ -8,6 +8,7 @@ use App\Models\Medicament;
 use App\Models\MovementStock;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+
 // use SebastianBergmann\CodeCoverage\Test\TestSize\Medium;
 
 class MedicamentController extends Controller
@@ -73,7 +74,7 @@ class MedicamentController extends Controller
             'image' => $imagePath ?? null,
             'ordonnance_requise' => $request->boolean('ordonnance_requise'),
         ]);
-        $stock=Stock::create([
+        $stock = Stock::create([
             'medicament_id' => $medicament->id,
             'numero_lot' => $validated['numero_lot'],
             'quantite' => $validated['quantite'],
@@ -85,13 +86,13 @@ class MedicamentController extends Controller
         ]);
 
         MovementStock::created([
-            'stock_id'=>$stock->id,
-            'user_id'=>auth()->id(),
-            'type'=>'entree',
-            'quantite'=>$validated['quantite'],
-            'quantite_avant'=>0,
-            'quantite_apres'=>$validated['quantite'],
-            'motif'=> 'Création médicament et stock initial',
+            'stock_id' => $stock->id,
+            'user_id' => auth()->id(),
+            'type' => 'entree',
+            'quantite' => $validated['quantite'],
+            'quantite_avant' => 0,
+            'quantite_apres' => $validated['quantite'],
+            'motif' => 'Création médicament et stock initial',
         ]);
 
         return redirect()->route('medicaments.index')
@@ -101,19 +102,13 @@ class MedicamentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Medicament $medicament)
+    public function show(int $id)
     {
         //
-        $medicament->load(['stocks' => function ($q) {
-            $q->where('is_actif', \true)
-                ->orderBy('date_expiration', 'asc');
-        }, 'stocks', 'categorie']);
-        // \dd($medicament->categorie->nom);
-        foreach ($medicament->stocks as $stocks) {
-            echo '<pre>';
-            var_dump($stocks);
-            echo '</pre>';
-        }
+        Medicament::with(['categorie', 'stocks' => function ($q) {
+            $q->orderBy('date_expiration', 'asc');
+        }])->find($id);
+        return view('medicaments.show', compact('medicament'));
     }
 
     /**

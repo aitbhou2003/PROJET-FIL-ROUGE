@@ -63,4 +63,10 @@ class Stock extends Model
     {
         return $query->whereBetween('date_expiration', [now(), now()->addDays(30)]);
     }
+
+    public function ventes(){
+        return $this->belongsToMany(Vente::class,'stock_ventes')
+        ->withPivot('quantite', 'prix_unitaire', 'total', 'medicament_id', 'etre_remise')
+        ->withTimestamps();
+    }
 }

@@ -33,4 +33,11 @@ class Medicament extends Model
     {
         return $this->stocks()->where('is_actif', true)->sum('quantite');
     }
+
+    public function ventes()
+    {
+        return $this->hasMany(StockVente::class);
+
+        
+    }
 }

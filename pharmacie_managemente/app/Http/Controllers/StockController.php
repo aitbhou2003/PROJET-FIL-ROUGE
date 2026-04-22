@@ -157,6 +157,6 @@ class StockController extends Controller
         ]);
 
         return redirect()->back()
-            ->with('success', 'stock mis à zéro');
+            ->with('success', 'stock mis a zero');
     }
 }

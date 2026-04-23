@@ -47,7 +47,7 @@ class VenteController extends Controller
         $medicaments = $medicaments->orderBy('nom', 'asc')
             ->paginate(12);
 
-       
+
 
         $categories = Categorie::all();
         $panier = session()->get('panier', []);
@@ -61,6 +61,35 @@ class VenteController extends Controller
             'totalPanier',
             'nbItemsPanier'
         ));
+    }
+
+
+    public function ajouterAuPanier(Request $request)
+    {
+        $validated = $request->validate([
+            'medicament_id' => ['required', 'exists:medicaments,id'],
+            'quantite'      => ['required', 'integer', 'min:1'],
+        ]);
+
+        $medicament = Medicament::with(['stocks' => function ($q) {
+            $q->where('is_actif', true)
+                ->where('quantite', '>', 0)
+                ->orderBy('date_expiration', 'asc');
+        }])->find($validated['medicament_id']);
+
+        $stockTotal = $medicament->stocks->sum('quantite');
+        if ($stockTotal < $validated['quantite']) {
+            return redirect()->back()
+                ->with('error', "Stock insuffisant (disponible : " . $stockTotal . ")");
+        }
+
+        $cheminOrdonnance = null;
+        if ($medicament->ordonnance_requise) {
+            $request->validate([
+                'ordonnance' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            ]);
+            $cheminOrdonnance = $request->file('ordonnance')->store('ordonnances', 'private');
+        }
     }
 
     /**
@@ -87,70 +116,7 @@ class VenteController extends Controller
     public function store(Request $request)
     {
         //
-        $validated = $request->validate([
-            'nom_client' => ['nullable', 'string', 'max:255'],
-            'mode_paiement' => ['required', 'in:espece,carte,mobile'],
-            'remise' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.stock_id' => ['required', 'exists:stocks,id'],
-            'items.*.quantite' => ['required', 'integer', 'min:1'],
-        ]);
 
-        DB::beginTransaction();
-
-        try {
-            $vente = Vente::create([
-                'user_id' => Auth::id(),
-                'nom_client' => $validated['nom_client'] ?? 'Client',
-                'mode_paiement' => $validated['mode_paiement'],
-                'remise' => $validated['remise'] ?? 0,
-                'total' => 0,
-
-            ]);
-            $totale = 0;
-            foreach ($validated['items'] as $item) {
-                $stock = Stock::find($item['stock_id']);
-                if ($stock->quantite < $item['quantite']) {
-                    throw new Exception("Stock insuffisant pour " . $stock->medicament->nom);
-                }
-
-                $sousTotale = $item['quantite'] * $stock->prix_vente;
-                $totale += $sousTotale;
-
-                StockVente::create([
-                    'vente_id' => $vente->id,
-                    'stock_id' => $stock->id,
-                    'quantite' => $item['quantite'],
-                    'prix_unitaire' => $stock->prix_vente,
-                    'total' => $sousTotale,
-                ]);
-
-                $quantiteAvant = $stock->quantite;
-                $stock->decrement('quantite', $item['quantite']);
-
-                MovementStock::create([
-                    'stock_id' => $stock->id,
-                    'user_id' => Auth::id(),
-                    'type' => 'sortie',
-                    'quantite' => $item['quantite'],
-                    'quantite_avant' => $quantiteAvant,
-                    'quantite_apres' => $quantiteAvant - $item['quantite'],
-                    'motif' => 'Vente #' . $vente->id . ' - ' . $vente->nom_client,
-                ]);
-
-                $remise = $validated['remise'] ?? 0;
-                $totalFinal = $totale - $remise;
-                $vente->update(['total' => $totalFinal]);
-
-                DB::commit();
-                return redirect()->route('ventes.show', $vente)
-                    ->with('success', 'Vente enregistrée ,Total: ' . number_format($totalFinal, 2) . 'Dh');
-            }
-        } catch (\Throwable $e) {
-            //throw $th;
-            DB::rollback();
-            return back()->with('error', 'Erreur: ' . $e->getMessage());
-        }
     }
 
     /**

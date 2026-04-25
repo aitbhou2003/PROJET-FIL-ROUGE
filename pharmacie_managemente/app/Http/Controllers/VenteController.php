@@ -90,6 +90,78 @@ class VenteController extends Controller
             ]);
             $cheminOrdonnance = $request->file('ordonnance')->store('ordonnances', 'private');
         }
+
+        $lots = $this->calculerLots($medicament->stocks, $validated['quantite']);
+
+        $prixUnitaire = $medicament->stocks->first()->prix_vente;
+        $item = [
+            'medicament_id'       => $medicament->id,
+            'nom'                 => $medicament->nom,
+            'quantite'            => $validated['quantite'],
+            'prix_unitaire'       => $prixUnitaire,
+            'total_ligne'         => $prixUnitaire * $validated['quantite'],
+            'lots'                => $lots,
+            'requiert_ordonnance' => $medicament->ordonnance_requise,
+            'ordonnance'          => $cheminOrdonnance,      // null si pas d'ordonnance
+        ];
+
+        $panier = session()->get('panier', []);
+        $existe = false;
+
+        foreach ($panier as $key => $p) {
+            if ($p['medicament_id'] == $medicament->id) {
+                $nouvelleQt = $p['quantite'] + $validated['quantite'];
+                if ($stockTotal < $nouvelleQt) {
+                    return redirect()->back()
+                        ->with('error', "Stock insuffisant (max : {$stockTotal})");
+                }
+                $lots = $this->calculerLots($medicament->stocks, $nouvelleQt);
+                $panier[$key]['quantite']    = $nouvelleQt;
+                $panier[$key]['total_ligne'] = $prixUnitaire * $nouvelleQt;
+                $panier[$key]['lots']        = $lots;
+                if ($medicament->ordonnance_requise && empty($panier[$key]['ordonnance'])) {
+                    $panier[$key]['ordonnance'] = $cheminOrdonnance;
+                }
+                $existe = true;
+                break;
+            }
+        }
+
+        if (! $existe) {
+            $panier[] = $item;
+        }
+
+        session()->put('panier', $panier);
+        return redirect()->back()
+            ->with('success', 'Produit ajouté au panier' . ($medicament->ordonnance_requise ? ' (ordonnance enregistrée)' : ''));
+    }
+
+    private function calculerLots($stocks, $qtDemandee)
+    {
+        $lots = [];
+        $reste = $qtDemandee;
+
+        foreach ($stocks as $stock) {
+            if ($reste <= 0) break;
+
+            $dispo = $stock->quantite;
+            if ($dispo <= 0) continue;
+
+            $prend = min($dispo, $reste);
+            $lots[] = [
+                'stock_id'        => $stock->id,
+                'numero_lot'      => $stock->numero_lot,
+                'quantite'        => $prend,
+                'date_expiration' => $stock->date_expiration->format('d/m/Y')
+            ];
+            $reste -= $prend;
+        }
+
+        return $lots;
+    }
+
+    public function modifierQuantitePanier(){
+        
     }
 
     /**

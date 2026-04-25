@@ -61,3 +61,7 @@ Route::middleware(['auth'])->group(function () {
     // stock
     Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
 });
+
+Route::post('/panier/ajouter', [VenteController::class, 'ajouterAuPanier'])
+    ->name('panier.ajouter');
+);

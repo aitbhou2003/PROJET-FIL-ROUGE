@@ -92,7 +92,6 @@ class VenteController extends Controller
         }
 
         $lots = $this->calculerLots($medicament->stocks, $validated['quantite']);
-
         $prixUnitaire = $medicament->stocks->first()->prix_vente;
         $item = [
             'medicament_id'       => $medicament->id,
@@ -104,6 +103,7 @@ class VenteController extends Controller
             'requiert_ordonnance' => $medicament->ordonnance_requise,
             'ordonnance'          => $cheminOrdonnance,      // null si pas d'ordonnance
         ];
+
 
         $panier = session()->get('panier', []);
         $existe = false;
@@ -160,8 +160,44 @@ class VenteController extends Controller
         return $lots;
     }
 
-    public function modifierQuantitePanier(){
-        
+    public function modifierQuantitePanier(Request $request, $index){
+        // dd(1);
+         $validated = $request->validate([
+            'quantite' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $panier = session()->get('panier', []);
+
+        if (!isset($panier[$index])) {
+            return redirect()->back()
+                ->with('error', 'Article introuvable dans le panier');
+        }
+
+        $medicamentId = $panier[$index]['medicament_id'];
+        $med = Medicament::with([
+            'stocks' => fn($q) => $q->where('is_actif', true)
+                                   ->where('date_expiration', '>', now())
+                                   ->where('quantite', '>', 0)
+                                   ->orderBy('date_expiration', 'asc')
+        ])->findOrFail($medicamentId);
+
+        $stockTotal = $med->stocks->sum('quantite');
+        if ($stockTotal < $validated['quantite']) {
+            return redirect()->back()
+                ->with('error', "Stock insuffisant (disponible : {$stockTotal})");
+        }
+
+        $lots = $this->calculerLots($med->stocks, $validated['quantite']);
+        $prix = $med->stocks->first()->prix_vente ;
+
+        $panier[$index]['quantite']    = $validated['quantite'];
+        $panier[$index]['total_ligne'] = $prix * $validated['quantite'];
+        $panier[$index]['lots']        = $lots;
+
+        session()->put('panier', $panier);
+
+        return redirect()->back()
+            ->with('success', 'Quantité mise à jour');
     }
 
     /**

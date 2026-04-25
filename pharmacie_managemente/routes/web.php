@@ -64,4 +64,5 @@ Route::middleware(['auth'])->group(function () {
 
 Route::post('/panier/ajouter', [VenteController::class, 'ajouterAuPanier'])
     ->name('panier.ajouter');
-);
+Route::put('/panier/{index}', [VenteController::class, 'modifierQuantitePanier'])
+    ->name('panier.modifier');

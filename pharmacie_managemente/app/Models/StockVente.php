@@ -15,6 +15,7 @@ class StockVente extends Model
         'stock_id',
         'quantite',
         'prix_unitaire',
+        'medicament_id',
         'total',
         'etre_remise'
     ];

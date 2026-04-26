@@ -66,3 +66,6 @@ Route::post('/panier/ajouter', [VenteController::class, 'ajouterAuPanier'])
     ->name('panier.ajouter');
 Route::put('/panier/{index}', [VenteController::class, 'modifierQuantitePanier'])
     ->name('panier.modifier');
+Route::delete('/panier/{index}', [VenteController::class, 'retirerDuPanier'])
+    ->name('panier.retirer');
+

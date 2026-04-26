@@ -88,7 +88,7 @@ class VenteController extends Controller
             $request->validate([
                 'ordonnance' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             ]);
-            $cheminOrdonnance = $request->file('ordonnance')->store('ordonnances', 'private');
+            $cheminOrdonnance = $request->file('ordonnance')->store('ordonnances', 'public');
         }
 
         $lots = $this->calculerLots($medicament->stocks, $validated['quantite']);
@@ -160,9 +160,10 @@ class VenteController extends Controller
         return $lots;
     }
 
-    public function modifierQuantitePanier(Request $request, $index){
+    public function modifierQuantitePanier(Request $request, $index)
+    {
         // dd(1);
-         $validated = $request->validate([
+        $validated = $request->validate([
             'quantite' => ['required', 'integer', 'min:1'],
         ]);
 
@@ -176,9 +177,9 @@ class VenteController extends Controller
         $medicamentId = $panier[$index]['medicament_id'];
         $med = Medicament::with([
             'stocks' => fn($q) => $q->where('is_actif', true)
-                                   ->where('date_expiration', '>', now())
-                                   ->where('quantite', '>', 0)
-                                   ->orderBy('date_expiration', 'asc')
+                ->where('date_expiration', '>', now())
+                ->where('quantite', '>', 0)
+                ->orderBy('date_expiration', 'asc')
         ])->findOrFail($medicamentId);
 
         $stockTotal = $med->stocks->sum('quantite');
@@ -188,7 +189,7 @@ class VenteController extends Controller
         }
 
         $lots = $this->calculerLots($med->stocks, $validated['quantite']);
-        $prix = $med->stocks->first()->prix_vente ;
+        $prix = $med->stocks->first()->prix_vente;
 
         $panier[$index]['quantite']    = $validated['quantite'];
         $panier[$index]['total_ligne'] = $prix * $validated['quantite'];
@@ -198,6 +199,45 @@ class VenteController extends Controller
 
         return redirect()->back()
             ->with('success', 'Quantité mise à jour');
+    }
+
+    public function retirerDuPanier($index)
+    {
+        $panier = session()->get('panier', []);
+
+        if (isset($panier[$index])) {
+            unset($panier[$index]);
+            $panier = array_values($panier);
+            session()->put('panier', $panier);
+        }
+
+        return redirect()->back()
+            ->with('success', 'Article supprimé du panier');
+    }
+
+    public function appliquerRemise(Request $request)
+    {
+        $validated = $request->validate([
+            'type'   => ['required', 'in:montant,pourcentage'],
+            'valeur' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $panier    = session()->get('panier', []);
+        $sousTotal = collect($panier)->sum('total_ligne');
+
+        $montant = $validated['valeur'];
+        if ($validated['type'] === 'pourcentage') {
+            $montant = $sousTotal * ($validated['valeur'] / 100);
+        }
+
+        session()->put('remise', [
+            'type'    => $validated['type'],
+            'valeur'  => $validated['valeur'],
+            'montant' => $montant,
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Remise appliquée : ' . number_format($montant, 2));
     }
 
     /**

@@ -240,6 +240,30 @@ class VenteController extends Controller
             ->with('success', 'Remise appliquée : ' . number_format($montant, 2));
     }
 
+    public function checkout()
+    {
+        $panier = session()->get('panier', []);
+        if (empty($panier)) {
+            return redirect()->route('ventes.index')
+                ->with('error', 'Le panier est vide');
+        }
+
+        $missing = collect($panier)
+            ->filter(fn($i) => $i['requiert_ordonnance'] && empty($i['ordonnance']))
+            ->count();
+
+        if ($missing > 0) {
+            return redirect()->route('ventes.index')
+                ->with('error', "Il manque {$missing} ordonnances. Vous devez les ajouter avant le paiement.");
+        }
+
+        $remise = session()->get('remise', ['montant' => 0]);
+        $totalHT = collect($panier)->sum('total_ligne');
+        $totalTTC =  $totalHT - $remise['montant'];
+
+        return view('ventes.checkout', compact('panier', 'totalHT', 'totalTTC', 'remise'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */

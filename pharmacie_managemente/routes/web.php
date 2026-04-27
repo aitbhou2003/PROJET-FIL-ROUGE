@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -52,6 +53,8 @@ Route::middleware(['checkRole:admin'])->group(function () {
     // stock
     Route::post('/stocks', [StockController::class, 'store'])->name('stocks.store');
     Route::post('/stocks/{stock}/update', [StockController::class, 'update'])->name('stocks.update');
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('admin.dashboard');
 });
 
 
@@ -61,11 +64,11 @@ Route::middleware(['checkRole:admin'])->group(function () {
 //     Route::post('/ventes', [VenteController::class, 'store'])->name('ventes.store');
 //     Route::get('/ventes/{vente}', [VenteController::class, 'show'])->name('ventes.show');
 //     // s tock
-    Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
+Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
 // });
 
 Route::middleware(['auth', 'checkRole:employe'])->group(function () {
-            // === VENTE (Page POS principale) ===
+    // === VENTE (Page POS principale) ===
     Route::get('/ventes/nouvelle', [VenteController::class, 'create'])->name('ventes.create');
     Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
 
@@ -83,5 +86,4 @@ Route::middleware(['auth', 'checkRole:employe'])->group(function () {
     // === REÇU ===
     Route::get('/ventes/consulter/{vente}', [RecuController::class, 'consulterRecu'])->name('ventes.consulterRecu');
     Route::get('/ventes/recu/{vente}', [RecuController::class, 'recu'])->name('ventes.recu');
-
 });

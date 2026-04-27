@@ -23,7 +23,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
             if ($user->isAdmin()) {
-                return redirect()->route('dashboard.admin');
+                return redirect()->route('admin.dashboard');
             } else {
                 return redirect()->route('dashboard.employe');
             }

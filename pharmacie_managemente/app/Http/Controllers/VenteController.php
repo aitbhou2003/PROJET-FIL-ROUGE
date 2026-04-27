@@ -232,6 +232,11 @@ class VenteController extends Controller
             $montant = $sousTotal * ($validated['valeur'] / 100);
         }
 
+        if ($montant > $sousTotal) {
+            return redirect()->back()
+                ->with('error', 'La remise ne peut pas dépasser le montant total de la vente.');
+        }
+
         session()->put('remise', [
             'type'    => $validated['type'],
             'valeur'  => $validated['valeur'],
@@ -240,6 +245,14 @@ class VenteController extends Controller
 
         return redirect()->back()
             ->with('success', 'Remise appliquée : ' . number_format($montant, 2));
+    }
+
+    public function supprimerRemise()
+    {
+        session()->forget('remise');
+
+        return redirect()->route('ventes.checkout')
+            ->with('success', 'Remise supprimée');
     }
 
 
@@ -268,6 +281,9 @@ class VenteController extends Controller
 
         return view('ventes.checkout', compact('panier', 'totalHT', 'totalTTC', 'remise'));
     }
+
+
+
 
     public function finaliserVente(Request $request)
     {
@@ -357,7 +373,14 @@ class VenteController extends Controller
         return view('ventes.recu', compact('vente'));
     }
 
-    
+    public function recu(Vente $vente)
+    {
+        $pdf = Pdf::loadView('ventes.recu_pdf', compact('vente'));
+
+        return $pdf->download('recu-vente-' . $vente->id . '.pdf');
+    }
+
+
 
 
     /**
@@ -394,12 +417,7 @@ class VenteController extends Controller
     {
         //
 
-        if (Auth::user()->isEmploye() && $vente->user_id !== Auth::id()) {
-            abort(403);
-        }
 
-        $vente->load('stockVentes.stock.medicament', 'user');
-        return view('ventes.show', compact('vente'));
     }
 
     /**
@@ -424,40 +442,6 @@ class VenteController extends Controller
     public function destroy(Vente $vente)
     {
         //
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
 
-        DB::beginTransaction();
-
-        try {
-            //code...
-            foreach ($vente->stockVentes as $SV) {
-                $stock = $SV->stock;
-                $quantiteAvant = $stock->quantite;
-                $stock->increment('quantite', $SV->quantite);
-                MovementStock::created([
-                    'stock_id' => $stock->id,
-                    'user_id' => Auth::id(),
-                    'type' => 'sortie',
-                    'quantite' => $SV->quantite,
-                    'quantite_avant' => $quantiteAvant,
-                    'quantite_apres' => $quantiteAvant + $SV->quantite,
-                    'motif' => 'Annulation  Vente #' . $vente->id,
-                ]);
-
-                $vente->stockVentes()->delete();
-                $vente->delete();
-
-                DB::commit();
-
-                return redirect()->route('ventes.index')
-                    ->with('success', 'Vente annulée et stock restauré.');
-            }
-        } catch (\Throwable $e) {
-            //throw $th;
-            DB::rollback();
-            return back()->with('error', "Erreur dans l'annulation.");
-        }
     }
 }

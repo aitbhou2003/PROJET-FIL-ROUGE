@@ -62,7 +62,7 @@ Route::middleware(['role:admin'])->group(function () {
 // });
 
 Route::middleware(['auth', 'checkRole:employe'])->group(function () {
-        Route::get('/ventes/nouvelle', [VenteController::class, 'create'])->name('ventes.create');
+    Route::get('/ventes/nouvelle', [VenteController::class, 'create'])->name('ventes.create');
 
 
     Route::get('/ventes', [VenteController::class, 'index'])
@@ -82,12 +82,14 @@ Route::middleware(['auth', 'checkRole:employe'])->group(function () {
     Route::post('/panier/remise', [VenteController::class, 'appliquerRemise'])
         ->name('panier.remise');
 
-    Route::post('ventes/finaliserVente',[VenteController::class,'finaliserVente'])
-    ->name('ventes.finaliser');
+    Route::post('ventes/finaliserVente', [VenteController::class, 'finaliserVente'])
+        ->name('ventes.finaliser');
 
     Route::get('/ventes/consulter/{vente}', [VenteController::class, 'consulterRecu'])
         ->name('ventes.consulterRecu');
-    
+
     Route::get('/ventes/recu/{vente}', [VenteController::class, 'recu'])
         ->name('ventes.recu');
+    Route::delete('/ventes/checkout/remise', [VenteController::class, 'supprimerRemise'])
+        ->name('ventes.checkout.remise.supprimer');
 });

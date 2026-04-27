@@ -33,14 +33,14 @@ Route::post('/logout', [LogoutController::class, 'logout'])
 Route::get('/admin/dashboard', function () {
     return view('dashboard.admin');
 })->name('dashboard.admin')
-    ->middleware('role:admin');
+    ->middleware('checkRole:admin');
 
 // empluye dashboared  
 Route::get('/employe/dashboard', function () {
     return view('dashboard.employe');
 })->name('dashboard.employe');
 
-Route::middleware(['role:admin'])->group(function () {
+Route::middleware(['checkRole:admin'])->group(function () {
     Route::get('/register', [RegisterController::class, 'index'])
         ->name('register');
 
@@ -61,7 +61,7 @@ Route::middleware(['role:admin'])->group(function () {
 //     Route::post('/ventes', [VenteController::class, 'store'])->name('ventes.store');
 //     Route::get('/ventes/{vente}', [VenteController::class, 'show'])->name('ventes.show');
 //     // s tock
-//     Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
+    Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
 // });
 
 Route::middleware(['auth', 'checkRole:employe'])->group(function () {

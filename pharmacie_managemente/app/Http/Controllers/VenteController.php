@@ -351,7 +351,14 @@ class VenteController extends Controller
         }
     }
 
+    public function consulterRecu(Vente $vente)
+    {
+        $vente->load(['stockVentes.medicament', 'stockVentes.stock', 'user']);
+        return view('ventes.recu', compact('vente'));
+    }
+
     
+
 
     /**
      * Show the form for creating a new resource.

@@ -82,6 +82,5 @@ Route::middleware(['auth', 'checkRole:employe'])->group(function () {
     Route::post('/panier/remise', [VenteController::class, 'appliquerRemise'])
         ->name('panier.remise');
 
-    Route::post('ventes/finaliserVente',[VenteController::class,'finaliserVente'])
-    ->name('ventes.finaliser');
+
 });

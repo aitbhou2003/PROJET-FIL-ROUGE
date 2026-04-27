@@ -23,6 +23,7 @@ class VenteController extends Controller
     public function index(Request $request)
     {
         //
+        //test
         $medicaments = Medicament::with(['categorie', 'stocks' => function ($q) {
             $q->where('is_actif', true)
                 ->where('date_expiration', '>', now())

@@ -3,7 +3,10 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\MedicamentController;
+use App\Http\Controllers\PanierController;
+use App\Http\Controllers\RecuController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\VenteController;
 use Illuminate\Support\Facades\Route;
@@ -57,30 +60,28 @@ Route::middleware(['role:admin'])->group(function () {
 //     Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
 //     Route::post('/ventes', [VenteController::class, 'store'])->name('ventes.store');
 //     Route::get('/ventes/{vente}', [VenteController::class, 'show'])->name('ventes.show');
-//     // stock
+//     // s tock
 //     Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
 // });
 
 Route::middleware(['auth', 'checkRole:employe'])->group(function () {
-        Route::get('/ventes/nouvelle', [VenteController::class, 'create'])->name('ventes.create');
+            // === VENTE (Page POS principale) ===
+    Route::get('/ventes/nouvelle', [VenteController::class, 'create'])->name('ventes.create');
+    Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
 
+    // === PANIER ===
+    Route::post('/panier/ajouter', [PanierController::class, 'ajouterAuPanier'])->name('panier.ajouter');
+    Route::put('/panier/{index}', [PanierController::class, 'modifierQuantitePanier'])->name('panier.modifier');
+    Route::delete('/panier/{index}', [PanierController::class, 'retirerDuPanier'])->name('panier.retirer');
+    Route::post('/panier/remise', [PanierController::class, 'appliquerRemise'])->name('panier.remise');
 
-    Route::get('/ventes', [VenteController::class, 'index'])
-        ->name('ventes.index');
+    // === CHECKOUT ===
+    Route::get('/ventes/checkout', [CheckoutController::class, 'checkout'])->name('ventes.checkout');
+    Route::post('/ventes/finaliser', [CheckoutController::class, 'finaliserVente'])->name('ventes.finaliser');
+    Route::delete('/ventes/checkout/remise', [PanierController::class, 'supprimerRemise'])->name('ventes.checkout.remise.supprimer');
 
-    Route::post('/panier/ajouter', [VenteController::class, 'ajouterAuPanier'])
-        ->name('panier.ajouter');
-
-    Route::put('/panier/{index}', [VenteController::class, 'modifierQuantitePanier'])
-        ->name('panier.modifier');
-
-    Route::delete('/panier/{index}', [VenteController::class, 'retirerDuPanier'])
-        ->name('panier.retirer');
-    Route::get('/ventes/checkout', [VenteController::class, 'checkout'])
-        ->name('ventes.checkout');
-
-    Route::post('/panier/remise', [VenteController::class, 'appliquerRemise'])
-        ->name('panier.remise');
-
+    // === REÇU ===
+    Route::get('/ventes/consulter/{vente}', [RecuController::class, 'consulterRecu'])->name('ventes.consulterRecu');
+    Route::get('/ventes/recu/{vente}', [RecuController::class, 'recu'])->name('ventes.recu');
 
 });

@@ -8,6 +8,7 @@ use App\Models\MovementStock;
 use App\Models\Stock;
 use App\Models\StockVente;
 use App\Models\Vente;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -340,8 +341,8 @@ class VenteController extends Controller
             DB::commit();
 
             session()->forget(['panier', 'remise']);
-
-            return redirect()->route('ventes.recu', $vente->id)
+            // dd($vente);
+            return redirect()->route('ventes.consulterRecu', $vente->id)
                 ->with('success', 'Vente enregistrée avec succès');
         } catch (Exception $e) {
             DB::rollBack();
@@ -349,6 +350,8 @@ class VenteController extends Controller
                 ->with('error', 'Erreur lors de la sauvegarde : ' . $e->getMessage());
         }
     }
+
+    
 
     /**
      * Show the form for creating a new resource.

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Models\Stock;
 
 class AlerteController extends Controller
 {
@@ -51,5 +52,62 @@ class AlerteController extends Controller
             ->with('success', 'Toutes les alertes ont été marquées comme lues');
     }
 
-    
+
+    public function genererAlertes()
+    {
+        $count = 0;
+
+        $stocksFaibles = Stock::with('medicament')
+            ->whereColumn('quantite', '<=', 'seuil_minimum')
+            ->where('is_actif', true)
+            ->get();
+
+        foreach ($stocksFaibles as $stock) {
+            $existe = Notification::where('stock_id', $stock->id)
+                ->where('type', 'stock_faible')
+                ->where('is_read', false)
+                ->exists();
+
+            if (!$existe) {
+                Notification::create([
+                    'stock_id' => $stock->id,
+                    'type' => 'stock_faible',
+                    'message' => "Le stock de {$stock->medicament->nom} (Lot: {$stock->numero_lot}) est inférieur au seuil minimum ({$stock->quantite} / {$stock->seuil_minimum})",
+                    'is_read' => false,
+                    'is_sent' => false,
+                ]);
+                $count++;
+            }
+        }
+
+        $stocksPeremption = Stock::with('medicament')
+            ->where('date_expiration', '<=', now()->addDays(30))
+            ->where('quantite', '>', 0)
+            ->where('is_actif', true)
+            ->get();
+
+        foreach ($stocksPeremption as $stock) {
+            $existe = Notification::where('stock_id', $stock->id)
+                ->where('type', 'peremption')
+                ->where('is_read', false)
+                ->exists();
+
+            if (!$existe) {
+                $joursRestants = now()->diffInDays($stock->date_expiration, false);
+                Notification::create([
+                    'stock_id' => $stock->id,
+                    'type' => 'peremption',
+                    'message' => "Le lot {$stock->numero_lot} de {$stock->medicament->nom} expire dans {$joursRestants} jours ({$stock->date_expiration->format('d/m/Y')})",
+                    'is_read' => false,
+                    'is_sent' => false,
+                ]);
+                $count++;
+            }
+        }
+
+        return redirect()->back()
+            ->with('success', "{$count} nouvelles alertes générées");
+    }
+
+
 }

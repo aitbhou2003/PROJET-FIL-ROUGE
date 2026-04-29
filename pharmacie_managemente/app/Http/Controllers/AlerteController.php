@@ -33,4 +33,23 @@ class AlerteController extends Controller
             'non_lues' => $nonLues
         ]);
     }
+
+    public function marquerCommeLue($id)
+    {
+        $alerte = Notification::findOrFail($id);
+        $alerte->update(['is_read' => true]);
+
+        return redirect()->back()
+            ->with('success', 'Alerte marquée comme lue');
+    }
+
+    public function toutMarquerCommeLu()
+    {
+        Notification::where('is_read', false)->update(['is_read' => true]);
+
+        return redirect()->back()
+            ->with('success', 'Toutes les alertes ont été marquées comme lues');
+    }
+
+    
 }

@@ -64,6 +64,8 @@ Route::middleware(['checkRole:admin'])->group(function () {
 
     Route::get('/admin/alertes', [AlerteController::class, 'index'])
         ->name('admin.alertes.index');
+    Route::post('/admin/alertes/{id}/lire', [AlerteController::class, 'marquerCommeLue'])->name('admin.alertes.lire');
+    Route::post('/admin/alertes/tout-lire', [AlerteController::class, 'toutMarquerCommeLu'])->name('admin.alertes.tout-lire');
 });
 
 

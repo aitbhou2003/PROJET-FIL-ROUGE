@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -55,6 +56,14 @@ Route::middleware(['checkRole:admin'])->group(function () {
     Route::post('/stocks/{stock}/update', [StockController::class, 'update'])->name('stocks.update');
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
+
+
+    //alerts
+    Route::get('/admin/alertes/dernieres', [AlerteController::class, 'dernieresAlertes'])
+        ->name('admin.alertes.dernieres');
+
+    Route::get('/admin/alertes', [AlerteController::class, 'index'])
+        ->name('admin.alertes.index');
 });
 
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AlerteController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -33,14 +35,14 @@ Route::post('/logout', [LogoutController::class, 'logout'])
 Route::get('/admin/dashboard', function () {
     return view('dashboard.admin');
 })->name('dashboard.admin')
-    ->middleware('role:admin');
+    ->middleware('checkRole:admin');
 
 // empluye dashboared  
 Route::get('/employe/dashboard', function () {
     return view('dashboard.employe');
 })->name('dashboard.employe');
 
-Route::middleware(['role:admin'])->group(function () {
+Route::middleware(['checkRole:admin'])->group(function () {
     Route::get('/register', [RegisterController::class, 'index'])
         ->name('register');
 
@@ -52,6 +54,20 @@ Route::middleware(['role:admin'])->group(function () {
     // stock
     Route::post('/stocks', [StockController::class, 'store'])->name('stocks.store');
     Route::post('/stocks/{stock}/update', [StockController::class, 'update'])->name('stocks.update');
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('admin.dashboard');
+
+
+    //alerts
+    Route::get('/admin/alertes/dernieres', [AlerteController::class, 'dernieresAlertes'])
+        ->name('admin.alertes.dernieres');
+
+    Route::get('/admin/alertes', [AlerteController::class, 'index'])
+        ->name('admin.alertes.index');
+    Route::post('/admin/alertes/{id}/lire', [AlerteController::class, 'marquerCommeLue'])->name('admin.alertes.lire');
+    Route::post('/admin/alertes/tout-lire', [AlerteController::class, 'toutMarquerCommeLu'])->name('admin.alertes.tout-lire');
+     Route::post('/admin/alertes/generer', [AlerteController::class, 'genererAlertes'])
+        ->name('admin.alertes.generer');
 });
 
 
@@ -61,11 +77,11 @@ Route::middleware(['role:admin'])->group(function () {
 //     Route::post('/ventes', [VenteController::class, 'store'])->name('ventes.store');
 //     Route::get('/ventes/{vente}', [VenteController::class, 'show'])->name('ventes.show');
 //     // s tock
-//     Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
+Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
 // });
 
 Route::middleware(['auth', 'checkRole:employe'])->group(function () {
-            // === VENTE (Page POS principale) ===
+    // === VENTE (Page POS principale) ===
     Route::get('/ventes/nouvelle', [VenteController::class, 'create'])->name('ventes.create');
     Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
 
@@ -83,5 +99,4 @@ Route::middleware(['auth', 'checkRole:employe'])->group(function () {
     // === REÇU ===
     Route::get('/ventes/consulter/{vente}', [RecuController::class, 'consulterRecu'])->name('ventes.consulterRecu');
     Route::get('/ventes/recu/{vente}', [RecuController::class, 'recu'])->name('ventes.recu');
-
 });
